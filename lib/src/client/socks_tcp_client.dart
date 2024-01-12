@@ -13,8 +13,8 @@ class _ProxyOverrides extends HttpOverrides {
 
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    HttpClient httpClient = HttpClient(context: context);
-    SocksTCPClient.assignToHttpClientWithSecureOptions(httpClient, proxies);
+    HttpClient httpClient = super.createHttpClient(context);
+    SocksTCPClient.assignToHttpClient(httpClient, proxies);
 
     if (onCreate != null) onCreate!(httpClient);
     return httpClient;
