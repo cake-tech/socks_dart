@@ -5,6 +5,16 @@ import '../shared/proxy_settings.dart';
 import 'socket_connection_task.dart';
 import 'socks_client.dart';
 
+// this is the only way to ensure we're making a non-tor connection:
+class NullOverrides extends HttpOverrides {
+  NullOverrides();
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context);
+  }
+}
+
 class _ProxyOverrides extends HttpOverrides {
   final Function(HttpClient)? onCreate;
   List<ProxySettings> proxies;
@@ -72,13 +82,9 @@ class SocksTCPClient extends SocksSocket {
   }
 
   static void setProxy({
-    required List<ProxySettings>? proxies,
+    required List<ProxySettings> proxies,
     Function(HttpClient)? onCreate,
   }) {
-    if (proxies == null) {
-      HttpOverrides.global = null;
-      return;
-    }
 
     final overrides = HttpOverrides.current;
     if (overrides is _ProxyOverrides) {
@@ -89,6 +95,10 @@ class SocksTCPClient extends SocksSocket {
         onCreate: onCreate,
       );
     }
+  }
+
+  static removeProxy() {
+    HttpOverrides.global = NullOverrides();
   }
 
   /// Connects proxy client to given [proxies] with exit point of [host]\:[port].
